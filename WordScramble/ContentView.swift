@@ -16,6 +16,8 @@ struct ContentView: View {
     @State private var errorMessage = ""
     @State private var showingError = false
     
+    @State private var score = 0
+    
     let minimumSize = 3
     
     var body: some View {
@@ -26,6 +28,10 @@ struct ContentView: View {
                         .textInputAutocapitalization(.never)
                 }
                 
+                Section("Score") {
+                    Text("\(score)")
+                }
+                
                 Section {
                     ForEach(usedWords, id: \.self) { word in
                         HStack {
@@ -34,6 +40,8 @@ struct ContentView: View {
                         }
                     }
                 }
+                
+                
             }
             .navigationTitle(rootWord)
             .onSubmit(addNewWord)
@@ -66,12 +74,20 @@ struct ContentView: View {
                 rootWord = allWords.randomElement() ?? "silkworm"
 
                 // If we are here everything has worked, so we can exit
+                
+                score = 0
+                
                 return
             }
         }
 
         // If were are *here* then there was a problem – trigger a crash and report the error
         fatalError("Could not load start.txt from bundle.")
+    }
+    
+    func calculateScore(word: String)
+    {
+        score += word.count
     }
     
     func addNewWord() {
@@ -111,6 +127,7 @@ struct ContentView: View {
         
         withAnimation {
             usedWords.insert(answer, at: 0)
+            calculateScore(word: answer)
         }
         
         newWord = ""
