@@ -16,6 +16,8 @@ struct ContentView: View {
     @State private var errorMessage = ""
     @State private var showingError = false
     
+    let minimumSize = 3
+    
     var body: some View {
         NavigationStack {
             List {
@@ -53,6 +55,26 @@ struct ContentView: View {
         }
     }
     
+    func startGame() {
+        // 1. Find the URL for start.txt in our app bundle
+        if let startWordsURL = Bundle.main.url(forResource: "start", withExtension: "txt") {
+            // 2. Load start.txt into a string
+            if let startWords = try? String(contentsOf: startWordsURL) {
+                // 3. Split the string up into an array of strings, splitting on line breaks
+                let allWords = startWords.components(separatedBy: "\n")
+
+                // 4. Pick one random word, or use "silkworm" as a sensible default
+                rootWord = allWords.randomElement() ?? "silkworm"
+
+                // If we are here everything has worked, so we can exit
+                return
+            }
+        }
+
+        // If were are *here* then there was a problem – trigger a crash and report the error
+        fatalError("Could not load start.txt from bundle.")
+    }
+    
     func addNewWord() {
         // lowercase and trim the word, to make sure we don't add duplicate words with case differences
         let answer = newWord
@@ -63,6 +85,11 @@ struct ContentView: View {
         guard answer.count > 0 else { return }
         
         // validation checks
+        guard isShort(word: answer) else {
+            wordError(title: "Word too short", message: "Enter a longer word")
+            return
+        }
+        
         guard isOriginal(word: answer) else {
             wordError(title: "Word used already", message: "Be more original")
             return
@@ -85,24 +112,9 @@ struct ContentView: View {
         newWord = ""
     }
     
-    func startGame() {
-        // 1. Find the URL for start.txt in our app bundle
-        if let startWordsURL = Bundle.main.url(forResource: "start", withExtension: "txt") {
-            // 2. Load start.txt into a string
-            if let startWords = try? String(contentsOf: startWordsURL) {
-                // 3. Split the string up into an array of strings, splitting on line breaks
-                let allWords = startWords.components(separatedBy: "\n")
-
-                // 4. Pick one random word, or use "silkworm" as a sensible default
-                rootWord = allWords.randomElement() ?? "silkworm"
-
-                // If we are here everything has worked, so we can exit
-                return
-            }
-        }
-
-        // If were are *here* then there was a problem – trigger a crash and report the error
-        fatalError("Could not load start.txt from bundle.")
+    // check if word is too short
+    func isShort(word: String) -> Bool {
+        return word.count >= minimumSize
     }
     
     // check if the word is original
