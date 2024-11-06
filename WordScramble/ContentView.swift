@@ -12,9 +12,19 @@ struct ContentView: View {
     @State private var rootWord = ""
     @State private var newWord = ""
     
+    @State private var errorTitle = ""
+    @State private var errorMessage = ""
+    @State private var showingError = false
+    
     var body: some View {
         NavigationStack {
             List {
+                Section {
+                    Text(rootWord)
+                        .font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
+                        .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
+                }
+                
                 Section {
                     TextField("Enter your word", text: $newWord)
                         .textInputAutocapitalization(.never)
@@ -33,6 +43,14 @@ struct ContentView: View {
         .navigationTitle(rootWord)
         .onSubmit(addNewWord)
         .onAppear(perform: startGame)
+//        .alert(errorTitle, isPresented: $showingError) {
+//            Button("OK") {}
+//        } message: {
+//            Text(errorMessage)
+//        }
+        .alert(errorTitle, isPresented: $showingError) { } message: {
+            Text(errorMessage)
+        }
     }
     
     func addNewWord() {
@@ -44,7 +62,21 @@ struct ContentView: View {
         // exit if the remaining string is empty
         guard answer.count > 0 else { return }
         
-        // extra validation to come
+        // validation checks
+        guard isOriginal(word: answer) else {
+            wordError(title: "Word used already", message: "Be more original")
+            return
+        }
+        
+        guard isPossible(word: answer) else {
+            wordError(title: "Word not possible", message: "You can't spell that word from '\(rootWord)'!")
+            return
+        }
+        
+        guard isReal(word: answer) else {
+            wordError(title: "Word not recognised", message: "You can't just make them up, you know!")
+            return
+        }
         
         withAnimation {
             usedWords.insert(answer, at: 0)
@@ -71,6 +103,46 @@ struct ContentView: View {
 
         // If were are *here* then there was a problem – trigger a crash and report the error
         fatalError("Could not load start.txt from bundle.")
+    }
+    
+    // check if the word is original
+    func isOriginal(word: String) -> Bool {
+        !usedWords.contains(word)
+    }
+    
+    // check if the word is possible
+    // check whether a random word can be made out of the letters from another random word
+    func isPossible(word: String) -> Bool {
+        var tempWord = rootWord
+        
+        for letter in word {
+            if let pos = tempWord.firstIndex(of: letter)
+            {
+                tempWord.remove(at: pos)
+            }
+            else
+            {
+                return false
+            }
+        }
+        
+        return true
+    }
+    
+    // check if the word is real
+    func isReal(word: String) -> Bool {
+        let checker = UITextChecker()
+        let range = NSRange(location: 0, length: word.utf16.count)
+        let misspelledRange = checker.rangeOfMisspelledWord(in: word, range: range, startingAt: 0, wrap: false, language: "en")
+
+        return misspelledRange.location == NSNotFound
+    }
+    
+    func wordError(title: String, message: String)
+    {
+        errorTitle = title
+        errorMessage = message
+        showingError = true
     }
 }
 
