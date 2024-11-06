@@ -48,6 +48,32 @@ struct TutorialView: View {
                     // we loaded the file into a string!
                 }
             }
+            
+            let input = "a b c"
+            let letters = input.components(separatedBy: " ")
+            
+            let inputNewLine = """
+                        a
+                        b
+                        c
+                        """
+            let lettersNewLine = input.components(separatedBy: "\n")
+            
+            let letter = letters.randomElement()
+            let trimmed = letter?.trimmingCharacters(in: .whitespacesAndNewlines)
+            
+            // Checking a string for misspelled words
+            let word = "swift"
+            let checker = UITextChecker()
+            
+            // ask Swift to create an Objective-C string range using the entire length of all our characters
+            let range = NSRange(location: 0, length: word.utf16.count)
+            
+            // ask our text checker to report where it found any misspellings in our word
+            let misspelledRange = checker.rangeOfMisspelledWord(in: word, range: range, startingAt: 0, wrap: false, language: "en")
+            
+            // check our spelling result to see whether there was a mistake or not
+            let allGood = misspelledRange.location == NSNotFound
         }
     }
 }
