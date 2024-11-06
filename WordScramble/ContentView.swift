@@ -22,12 +22,6 @@ struct ContentView: View {
         NavigationStack {
             List {
                 Section {
-                    Text(rootWord)
-                        .font(/*@START_MENU_TOKEN@*/.title/*@END_MENU_TOKEN@*/)
-                        .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
-                }
-                
-                Section {
                     TextField("Enter your word", text: $newWord)
                         .textInputAutocapitalization(.never)
                 }
@@ -41,18 +35,23 @@ struct ContentView: View {
                     }
                 }
             }
+            .navigationTitle(rootWord)
+            .onSubmit(addNewWord)
+            .onAppear(perform: startGame)
+            //        .alert(errorTitle, isPresented: $showingError) {
+            //            Button("OK") {}
+            //        } message: {
+            //            Text(errorMessage)
+            //        }
+            .alert(errorTitle, isPresented: $showingError) { } message: {
+                Text(errorMessage)
+            }
+            .toolbar {
+                Button("Start Game", action: startGame)
+            }
         }
-        .navigationTitle(rootWord)
-        .onSubmit(addNewWord)
-        .onAppear(perform: startGame)
-//        .alert(errorTitle, isPresented: $showingError) {
-//            Button("OK") {}
-//        } message: {
-//            Text(errorMessage)
-//        }
-        .alert(errorTitle, isPresented: $showingError) { } message: {
-            Text(errorMessage)
-        }
+        
+
     }
     
     func startGame() {
