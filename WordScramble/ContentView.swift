@@ -90,6 +90,11 @@ struct ContentView: View {
             return
         }
         
+        guard isRootWord(word: answer) else {
+            wordError(title: "Word matches", message: "You can't used the same word as '\(rootWord)'")
+            return
+        }
+        
         guard isOriginal(word: answer) else {
             wordError(title: "Word used already", message: "Be more original")
             return
@@ -115,6 +120,10 @@ struct ContentView: View {
     // check if word is too short
     func isShort(word: String) -> Bool {
         return word.count >= minimumSize
+    }
+    
+    func isRootWord(word: String) -> Bool {
+        return word != rootWord
     }
     
     // check if the word is original
